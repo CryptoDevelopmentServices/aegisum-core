@@ -81,7 +81,8 @@ unsigned int GetNextWorkRequiredPerBlock(const CBlockIndex* pindexLast, const CB
             return nProofOfWorkLimit;
     }
 
-    // Calculate the time difference between the last block and the previous block
+    // Per-block difficulty adjustment - target 3 minutes per block (nPowTargetSpacing)
+    // This replaces the old system that targeted 9 minutes for 3 blocks (nPowTargetTimespan)
     int64_t nActualTimespan = pindexLast->GetBlockTime() - pindexLast->pprev->GetBlockTime();
     
     // Prevent negative time (should not happen in practice, but safety first)
@@ -89,11 +90,10 @@ unsigned int GetNextWorkRequiredPerBlock(const CBlockIndex* pindexLast, const CB
         nActualTimespan = params.nPowTargetSpacing;
     }
 
-    // Apply per-block difficulty adjustment limits
-    // Max 10% increase in difficulty (0.9x time = 1.111x difficulty)
-    // Max 20% decrease in difficulty (1.2x time = 0.833x difficulty)
-    int64_t nMinTimespan = (params.nPowTargetSpacing * 9) / 10;  // 90% of target = max difficulty increase
-    int64_t nMaxTimespan = (params.nPowTargetSpacing * 12) / 10; // 120% of target = max difficulty decrease
+    // Apply per-block difficulty adjustment limits using configurable parameters
+    // Convert percentage to fraction (e.g., 110% = 1.1, 120% = 1.2)
+    int64_t nMinTimespan = (params.nPowTargetSpacing * 100) / params.nPerBlockDifficultyMaxIncrease;
+    int64_t nMaxTimespan = (params.nPowTargetSpacing * params.nPerBlockDifficultyMaxDecrease) / 100;
 
     if (nActualTimespan < nMinTimespan)
         nActualTimespan = nMinTimespan;
