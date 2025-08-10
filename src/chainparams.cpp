@@ -79,6 +79,7 @@ public:
         consensus.nPowTargetTimespan =  9 * 60;
         consensus.nPowTargetSpacing = 3 * 60;
         consensus.nDifficultyChangeActivationHeight = 21000; // Activate new difficulty rules at block 21000
+        consensus.nPerBlockDifficultyActivationHeight = 54000; // Activate per-block difficulty adjustment at block 54000
         consensus.fPowAllowMinDifficultyBlocks = false;
         consensus.fPowNoRetargeting = false;
         consensus.nRuleChangeActivationThreshold = 2; // 75% of 3
@@ -183,6 +184,7 @@ public:
         consensus.nPowTargetTimespan =  9 * 60;
         consensus.nPowTargetSpacing = 3 * 60;
         consensus.nDifficultyChangeActivationHeight = 20000; // Activate new difficulty rules at block 20000
+        consensus.nPerBlockDifficultyActivationHeight = 25; // Activate per-block difficulty adjustment at block 25
         consensus.fPowAllowMinDifficultyBlocks = true;
         consensus.fPowNoRetargeting = false;
         consensus.nRuleChangeActivationThreshold = 1512; // 75% for testchains
@@ -274,6 +276,7 @@ public:
         consensus.nPowTargetTimespan =  9 * 60;
         consensus.nPowTargetSpacing = 3 * 60;
         consensus.nDifficultyChangeActivationHeight = 20000; // Activate new difficulty rules at block 20000
+        consensus.nPerBlockDifficultyActivationHeight = 100; // Activate per-block difficulty adjustment at block 100 for regtest
         consensus.fPowAllowMinDifficultyBlocks = true;
         consensus.fPowNoRetargeting = true;
         consensus.nRuleChangeActivationThreshold = 108; // 75% for testchains
