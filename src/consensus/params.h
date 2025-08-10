@@ -91,8 +91,11 @@ struct Params {
     int64_t DifficultyAdjustmentInterval() const { return nPowTargetTimespan / nPowTargetSpacing; }
     // Block height at which the new difficulty adjustment rules become active
     int nDifficultyChangeActivationHeight;
-    // Block height at which per-block difficulty adjustment becomes active
+    // Block height at which per-block difficulty adjustment becomes active 
     int nPerBlockDifficultyActivationHeight;
+    // Per-block difficulty adjustment parameters 
+    uint32_t nPerBlockDifficultyMaxIncrease;
+    uint32_t nPerBlockDifficultyMaxDecrease;
     /** The best chain should have at least this much work */
     uint256 nMinimumChainWork;
     /** By default assume that the signatures in ancestors of this block are valid */
