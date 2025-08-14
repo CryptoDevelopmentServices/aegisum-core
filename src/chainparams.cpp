@@ -76,12 +76,17 @@ public:
         consensus.SegwitHeight = 0; 
         consensus.MinBIP9WarningHeight = 0; // segwit activation height + miner confirmation window
         consensus.powLimit = uint256S("00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
-        consensus.nPowTargetTimespan =  9 * 60;
-        consensus.nPowTargetSpacing = 3 * 60;
+        // Proof of work timing parameters
+        consensus.nPowTargetTimespan =  9 * 60;  // 9 minutes - ONLY used for legacy difficulty adjustment 
+        consensus.nPowTargetSpacing = 3 * 60;    // 3 minutes - target time per block 
         consensus.nDifficultyChangeActivationHeight = 21000; // Activate new difficulty rules at block 21000
+        consensus.nPerBlockDifficultyActivationHeight = 51400; // Activate per-block difficulty adjustment at block 51400
+        // Per-block difficulty adjustment parameters 
+        consensus.nPerBlockDifficultyMaxIncrease = 105; // 5% max increase
+        consensus.nPerBlockDifficultyMaxDecrease = 110; // 10% max decrease
         consensus.fPowAllowMinDifficultyBlocks = false;
         consensus.fPowNoRetargeting = false;
-        consensus.nRuleChangeActivationThreshold = 2; // 75% of 3
+        consensus.nRuleChangeActivationThreshold = 2; 
         consensus.nMinerConfirmationWindow = 12; // nPowTargetTimespan / nPowTargetSpacing * 4
 
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit = 28;
@@ -127,6 +132,8 @@ public:
         // This is fine at runtime as we'll fall back to using them as an addrfetch if they don't support the
         // service bits we want, but we should get them updated to support all service bits wanted by any
         // release ASAP to avoid it where possible.
+        
+        vSeeds.emplace_back("seed.aegisum.com");
         vSeeds.emplace_back("node.aegisum.com");
 
         base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,24);
@@ -176,17 +183,22 @@ public:
         consensus.BIP34Hash = uint256();
         consensus.BIP65Height = 76; 
         consensus.BIP66Height = 76; 
-        consensus.CSVHeight = 6048; // 00000000025e930139bac5c6c31a403776da130831ab85be56578f3fa75369bb
-        consensus.SegwitHeight = 6048; // 00000000002b980fcd729daaa248fd9316a5200e9b367f4ff2c42453e84201ca
-        consensus.MinBIP9WarningHeight = 8064; // segwit activation height + miner confirmation window
+        consensus.CSVHeight = 0; // 00000000025e930139bac5c6c31a403776da130831ab85be56578f3fa75369bb
+        consensus.SegwitHeight = 0; // 00000000002b980fcd729daaa248fd9316a5200e9b367f4ff2c42453e84201ca
+        consensus.MinBIP9WarningHeight = 0; // segwit activation height + miner confirmation window
         consensus.powLimit = uint256S("00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
-        consensus.nPowTargetTimespan =  9 * 60;
-        consensus.nPowTargetSpacing = 3 * 60;
-        consensus.nDifficultyChangeActivationHeight = 20000; // Activate new difficulty rules at block 20000
-        consensus.fPowAllowMinDifficultyBlocks = true;
+        // Proof of work timing parameters
+        consensus.nPowTargetTimespan =  9 * 60;  // 9 minutes - ONLY used for legacy difficulty adjustment
+        consensus.nPowTargetSpacing = 3 * 60;    // 3 minutes - target time per block (used for both legacy and per-block algorithms)
+        consensus.nDifficultyChangeActivationHeight = 12; // Activate new difficulty rules at block 12
+        consensus.nPerBlockDifficultyActivationHeight = 18; // Activate per-block difficulty adjustment at block 18
+        // Per-block difficulty adjustment parameters 
+        consensus.nPerBlockDifficultyMaxIncrease = 110; // 10% max increase  
+        consensus.nPerBlockDifficultyMaxDecrease = 120; // 20% max decrease
+        consensus.fPowAllowMinDifficultyBlocks = false;
         consensus.fPowNoRetargeting = false;
         consensus.nRuleChangeActivationThreshold = 1512; // 75% for testchains
-        consensus.nMinerConfirmationWindow = 2016; // nPowTargetTimespan / nPowTargetSpacing
+        consensus.nMinerConfirmationWindow = 12; // nPowTargetTimespan / nPowTargetSpacing
 
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit = 28;
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nStartTime = Consensus::BIP9Deployment::NEVER_ACTIVE;
@@ -209,8 +221,8 @@ public:
         pchMessageStart[1] = 0xcd;
         pchMessageStart[2] = 0x83;
         pchMessageStart[3] = 0xdc;
-        nDefaultPort = 32276;
-        nPruneAfterHeight = 1000;
+        nDefaultPort = 38841;
+        nPruneAfterHeight = 100000;
         m_assumed_blockchain_size = 4;
         m_assumed_chain_state_size = 1;
 
@@ -222,9 +234,9 @@ public:
         vFixedSeeds.clear();
         vSeeds.clear();
 
-        base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,1);
-        base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,196);
-        base58Prefixes[SCRIPT_ADDRESS2] = std::vector<unsigned char>(1,0);
+        base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1, 30); // 'T'
+        base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1, 5);  // '3'
+        base58Prefixes[SCRIPT_ADDRESS2] = std::vector<unsigned char>(1, 5); // '3'
         base58Prefixes[SECRET_KEY] =     std::vector<unsigned char>(1,128);
         base58Prefixes[EXT_PUBLIC_KEY] = {0x04, 0x35, 0x87, 0xCF};
         base58Prefixes[EXT_SECRET_KEY] = {0x04, 0x35, 0x83, 0x94};
@@ -271,9 +283,14 @@ public:
         consensus.SegwitHeight = 0; // SEGWIT is always activated on regtest unless overridden
         consensus.MinBIP9WarningHeight = 0;
         consensus.powLimit = uint256S("7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
-        consensus.nPowTargetTimespan =  9 * 60;
-        consensus.nPowTargetSpacing = 3 * 60;
+        // Proof of work timing parameters
+        consensus.nPowTargetTimespan =  9 * 60;  // 9 minutes - ONLY used for legacy difficulty adjustment (pre-softfork)
+        consensus.nPowTargetSpacing = 3 * 60;    // 3 minutes - target time per block (used for both legacy and per-block algorithms)
         consensus.nDifficultyChangeActivationHeight = 20000; // Activate new difficulty rules at block 20000
+        consensus.nPerBlockDifficultyActivationHeight = 100; // Activate per-block difficulty adjustment at block 100 for regtest
+        // Per-block difficulty adjustment parameters (Aegisum Softfork)
+        consensus.nPerBlockDifficultyMaxIncrease = 110; // 10% max increase
+        consensus.nPerBlockDifficultyMaxDecrease = 120; // 20% max decrease
         consensus.fPowAllowMinDifficultyBlocks = true;
         consensus.fPowNoRetargeting = true;
         consensus.nRuleChangeActivationThreshold = 108; // 75% for testchains

@@ -15,6 +15,15 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
     assert(pindexLast != nullptr);
     unsigned int nProofOfWorkLimit = UintToArith256(params.powLimit).GetCompact();
 
+    // Check if we're at or past the per-block difficulty activation height
+    bool fPerBlockDifficulty = (pindexLast->nHeight + 1) >= params.nPerBlockDifficultyActivationHeight;
+    
+    if (fPerBlockDifficulty) {
+        // New per-block difficulty adjustment algorithm
+        return GetNextWorkRequiredPerBlock(pindexLast, pblock, params);
+    }
+
+    // Legacy difficulty adjustment logic (pre-softfork)
     // Only change once per difficulty adjustment interval
     if ((pindexLast->nHeight+1) % params.DifficultyAdjustmentInterval() != 0)
     {
@@ -52,6 +61,65 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
     assert(pindexFirst);
 
     return CalculateNextWorkRequired(pindexLast, pindexFirst->GetBlockTime(), params);
+}
+
+unsigned int GetNextWorkRequiredPerBlock(const CBlockIndex* pindexLast, const CBlockHeader *pblock, const Consensus::Params& params)
+{
+    assert(pindexLast != nullptr);
+    unsigned int nProofOfWorkLimit = UintToArith256(params.powLimit).GetCompact();
+
+    // Genesis block or first block after activation
+    if (pindexLast->pprev == nullptr || pindexLast->nHeight + 1 == params.nPerBlockDifficultyActivationHeight) {
+        return pindexLast->nBits;
+    }
+
+    // Special difficulty rule for testnet:
+    // If the new block's timestamp is more than 2 * target spacing
+    // then allow mining of a min-difficulty block.
+    if (params.fPowAllowMinDifficultyBlocks) {
+        if (pblock->GetBlockTime() > pindexLast->GetBlockTime() + params.nPowTargetSpacing * 2)
+            return nProofOfWorkLimit;
+    }
+
+    // Per-block difficulty adjustment - target 3 minutes per block (nPowTargetSpacing)
+    // This replaces the old system that targeted 9 minutes for 3 blocks (nPowTargetTimespan)
+    int64_t nActualTimespan = pindexLast->GetBlockTime() - pindexLast->pprev->GetBlockTime();
+    
+    // Prevent negative time (should not happen in practice, but safety first)
+    if (nActualTimespan < 0) {
+        nActualTimespan = params.nPowTargetSpacing;
+    }
+
+    // Apply per-block difficulty adjustment limits using configurable parameters
+    // Convert percentage to fraction (e.g., 110% = 1.1, 120% = 1.2)
+    int64_t nMinTimespan = (params.nPowTargetSpacing * 100) / params.nPerBlockDifficultyMaxIncrease;
+    int64_t nMaxTimespan = (params.nPowTargetSpacing * params.nPerBlockDifficultyMaxDecrease) / 100;
+
+    if (nActualTimespan < nMinTimespan)
+        nActualTimespan = nMinTimespan;
+    if (nActualTimespan > nMaxTimespan)
+        nActualTimespan = nMaxTimespan;
+
+    // Retarget
+    arith_uint256 bnNew;
+    arith_uint256 bnOld;
+    bnNew.SetCompact(pindexLast->nBits);
+    bnOld = bnNew;
+    
+    // Aegisum: intermediate uint256 can overflow by 1 bit
+    const arith_uint256 bnPowLimit = UintToArith256(params.powLimit);
+    bool fShift = bnNew.bits() > bnPowLimit.bits() - 1;
+    if (fShift)
+        bnNew >>= 1;
+    bnNew *= nActualTimespan;
+    bnNew /= params.nPowTargetSpacing;
+    if (fShift)
+        bnNew <<= 1;
+
+    if (bnNew > bnPowLimit)
+        bnNew = bnPowLimit;
+
+    return bnNew.GetCompact();
 }
 
 unsigned int CalculateNextWorkRequired(const CBlockIndex* pindexLast, int64_t nFirstBlockTime, const Consensus::Params& params)
