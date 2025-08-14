@@ -80,13 +80,13 @@ public:
         consensus.nPowTargetTimespan =  9 * 60;  // 9 minutes - ONLY used for legacy difficulty adjustment 
         consensus.nPowTargetSpacing = 3 * 60;    // 3 minutes - target time per block 
         consensus.nDifficultyChangeActivationHeight = 21000; // Activate new difficulty rules at block 21000
-        consensus.nPerBlockDifficultyActivationHeight = 54000; // Activate per-block difficulty adjustment at block 54000
+        consensus.nPerBlockDifficultyActivationHeight = 51400; // Activate per-block difficulty adjustment at block 51400
         // Per-block difficulty adjustment parameters 
-        consensus.nPerBlockDifficultyMaxIncrease = 110; // 10% max increase
-        consensus.nPerBlockDifficultyMaxDecrease = 120; // 20% max decrease
+        consensus.nPerBlockDifficultyMaxIncrease = 105; // 5% max increase
+        consensus.nPerBlockDifficultyMaxDecrease = 110; // 10% max decrease
         consensus.fPowAllowMinDifficultyBlocks = false;
         consensus.fPowNoRetargeting = false;
-        consensus.nRuleChangeActivationThreshold = 2; // 75% of 3
+        consensus.nRuleChangeActivationThreshold = 2; 
         consensus.nMinerConfirmationWindow = 12; // nPowTargetTimespan / nPowTargetSpacing * 4
 
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit = 28;
@@ -133,8 +133,8 @@ public:
         // service bits we want, but we should get them updated to support all service bits wanted by any
         // release ASAP to avoid it where possible.
         
-        vSeeds.emplace_back("seed.dns.aegisum-seeder.com");
-        vSeeds.emplace_back("dns.aegisum-seeder.com");
+        vSeeds.emplace_back("seed.aegisum.com");
+        vSeeds.emplace_back("node.aegisum.com");
 
         base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,24);
         base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,5);
@@ -188,11 +188,11 @@ public:
         consensus.MinBIP9WarningHeight = 0; // segwit activation height + miner confirmation window
         consensus.powLimit = uint256S("00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         // Proof of work timing parameters
-        consensus.nPowTargetTimespan =  9 * 60;  // 9 minutes - ONLY used for legacy difficulty adjustment (pre-softfork)
+        consensus.nPowTargetTimespan =  9 * 60;  // 9 minutes - ONLY used for legacy difficulty adjustment
         consensus.nPowTargetSpacing = 3 * 60;    // 3 minutes - target time per block (used for both legacy and per-block algorithms)
-        consensus.nDifficultyChangeActivationHeight = 12; // Activate new difficulty rules at block 20000
-        consensus.nPerBlockDifficultyActivationHeight = 18; // Activate per-block difficulty adjustment at block 25
-        // Per-block difficulty adjustment parameters (Aegisum Softfork)
+        consensus.nDifficultyChangeActivationHeight = 12; // Activate new difficulty rules at block 12
+        consensus.nPerBlockDifficultyActivationHeight = 18; // Activate per-block difficulty adjustment at block 18
+        // Per-block difficulty adjustment parameters 
         consensus.nPerBlockDifficultyMaxIncrease = 110; // 10% max increase  
         consensus.nPerBlockDifficultyMaxDecrease = 120; // 20% max decrease
         consensus.fPowAllowMinDifficultyBlocks = false;
