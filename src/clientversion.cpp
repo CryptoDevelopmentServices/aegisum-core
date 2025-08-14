@@ -28,7 +28,7 @@ const std::string CLIENT_NAME("AegisumCore");
     #define BUILD_DESC BUILD_GIT_TAG
     #define BUILD_SUFFIX ""
 #else
-    #define BUILD_DESC "v2.1.6"
+    #define BUILD_DESC "v2.2.1"
     #ifdef BUILD_GIT_COMMIT
         #define BUILD_SUFFIX "-" BUILD_GIT_COMMIT
     #elif defined(GIT_COMMIT_ID)
